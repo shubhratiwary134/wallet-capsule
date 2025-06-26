@@ -22,6 +22,7 @@ contract Wallet {
             msg.value > 0 && msg.value <= maxLimit,
             "Higher than the limit of none ether sent."
         );
+        userSafes[msg.sender].push(Safe(msg.value, block.timestamp + 120));
         emit Deposited(msg.sender, msg.value, block.timestamp);
     }
     fallback() external payable {
@@ -36,18 +37,18 @@ contract Wallet {
         emit Deposited(msg.sender, msg.value, block.timestamp);
     }
     function withdraw(uint amount, uint safeIndex) external {
-        Safe storage safe = userSafes[msg.sender][safeIndex];
         require(
             safeIndex < userSafes[msg.sender].length,
             "The Safe does not exist."
         );
+        Safe storage safe = userSafes[msg.sender][safeIndex];
         require(
             amount <= safe.amount,
             "The amount asked for the withdraw is more than the deposited."
         );
-        require(block.timestamp > safe.unlockTime, "The safe is still locked");
+        require(block.timestamp >= safe.unlockTime, "The safe is still locked");
         safe.amount = safe.amount - amount;
-
+        // here i will add the logic of removing the safe from which the amount is completely removed.
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         require(success, "The transaction was not complete");
         emit Withdrawn(msg.sender, amount, block.timestamp);
