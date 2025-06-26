@@ -12,6 +12,13 @@ contract Wallet {
     constructor() {
         owner = msg.sender;
     }
+    receive() external payable {
+        trackEth[msg.sender] = msg.value;
+        emit Deposited(msg.sender, msg.value, block.timestamp);
+    }
+    fallback() external payable {
+        revert("Invalid function call,REVERTED");
+    }
     function deposit() external payable {
         require(msg.value > 0, "Caller of the function must send some WEI.");
         trackEth[msg.sender] += msg.value;
