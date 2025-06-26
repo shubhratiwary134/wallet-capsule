@@ -35,4 +35,7 @@ contract Wallet {
         require(success, "The transaction was not complete");
         emit Withdrawn(msg.sender, amount, block.timestamp);
     }
+    function displayBalance() external view returns (uint) {
+        return trackEth[msg.sender];
+    }
 }
