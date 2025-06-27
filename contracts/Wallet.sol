@@ -22,6 +22,7 @@ contract Wallet {
             msg.value > 0 && msg.value <= maxLimit,
             "Higher than the limit of none ether sent."
         );
+        require(userSafes[msg.sender].length < 20, "Too many safes created");
         userSafes[msg.sender].push(Safe(msg.value, block.timestamp + 120));
         emit Deposited(msg.sender, msg.value, block.timestamp);
     }
@@ -33,6 +34,7 @@ contract Wallet {
             msg.value > 0 && msg.value <= maxLimit,
             "Higher than the limit of none ether sent."
         );
+        require(userSafes[msg.sender].length < 20, "Too many safes created");
         userSafes[msg.sender].push(Safe(msg.value, block.timestamp + lockTime));
         emit Deposited(msg.sender, msg.value, block.timestamp);
     }
@@ -44,7 +46,7 @@ contract Wallet {
         Safe storage safe = userSafes[msg.sender][safeIndex];
         require(
             amount <= safe.amount,
-            "The amount asked for the withdraw is more than the deposited."
+            "The amount asked for the withdraw is more than the balance."
         );
         require(block.timestamp >= safe.unlockTime, "The safe is still locked");
         safe.amount = safe.amount - amount;
@@ -61,5 +63,10 @@ contract Wallet {
     }
     function getSafes() external view returns (Safe[] memory) {
         return userSafes[msg.sender];
+    }
+    function getParticularSafe(
+        uint safeIndex
+    ) external view returns (Safe memory) {
+        return userSafes[msg.sender][safeIndex];
     }
 }
