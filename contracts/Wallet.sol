@@ -48,7 +48,13 @@ contract Wallet {
         );
         require(block.timestamp >= safe.unlockTime, "The safe is still locked");
         safe.amount = safe.amount - amount;
-        // here i will add the logic of removing the safe from which the amount is completely removed.
+        if (safe.amount == 0) {
+            uint last = userSafes[msg.sender].length - 1;
+            if (last != safeIndex) {
+                userSafes[msg.sender][safeIndex] = userSafes[msg.sender][last];
+            }
+            userSafes[msg.sender].pop();
+        }
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         require(success, "The transaction was not complete");
         emit Withdrawn(msg.sender, amount, block.timestamp);
